@@ -28,7 +28,6 @@ class Crimes(Base):
     incident_number = Column(String(20))
     offense_code = Column(Integer, ForeignKey('offense_codes.offense_code'))
     offense_code_group = Column(String(50))
-    offense_description = Column(String(100))
     district = Column(String(5), ForeignKey(
         'police_district_codes.district_code'))
     reporting_area = Column(String(5))
@@ -82,6 +81,9 @@ def insert_data():
         'DATA/offense_codes.csv', encoding='windows-1252')
     police_district_codes_df = pd.read_csv(
         'DATA/police_district_codes.csv', encoding='windows-1252')
+
+    # drop Offence_DEscription column
+    crimes_df.drop('OFFENSE_DESCRIPTION', axis=1, inplace=True)
 
     # fill empty SHOOTING column with 'N'
     crimes_df['SHOOTING'].fillna('N', inplace=True)
