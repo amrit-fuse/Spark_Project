@@ -2,12 +2,17 @@ from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.functions import udf,col,countDistinct,date_format,row_number
 from pyspark.sql.window import Window
 
-'''spark-submit --driver-class-path /usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar netflix.p
+'''spark-submit --driver-class-path /usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar file_name.py
 '''
 
-spark = SparkSession.builder.appName("crime_boston").getOrCreate()
+spark = SparkSession.builder.config("spark.jars", "/usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar") \
+    .master("local").appName("crime_boston").getOrCreate()
 
-crime_df = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
+# crime_df = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
+
+crime_df = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
+    .option("driver", "org.postgresql.Driver").option("dbtable", "crimes") \
+    .option("user", "fusemachines").option("password", "hello123").load()
 
 crime_df.show()
 
@@ -54,8 +59,13 @@ total_robbery.write.format('jdbc').options(url='jdbc:postgresql://localhost:5432
 
 
 # 4.Show all Offense_codes and names which are not listed in crime.csv but in offense_code.csv.
-dfj1 = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
-dfj2 = spark.read.csv("/home/saurav/Downloads/offense_codes.csv",header=True,inferSchema=True)
+dfj1 = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
+    .option("driver", "org.postgresql.Driver").option("dbtable", "crimes") \
+    .option("user", "fusemachines").option("password", "hello123").load()
+
+dfj2 = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
+    .option("driver", "org.postgresql.Driver").option("dbtable", "offense_codes") \
+    .option("user", "fusemachines").option("password", "hello123").load()
 
 result = dfj2.join(dfj1,dfj1.OFFENSE_CODE==dfj2.CODE,"left_anti")
 result.show()
