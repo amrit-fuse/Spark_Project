@@ -95,12 +95,12 @@ def insert_data():
     # keep only first duplicate value in offence_code_df
     offense_codes_df.drop_duplicates(subset='CODE', keep='first', inplace=True)
 
-    # # save to Pre_processed_DATA folder
-    # crimes_df.to_csv('Pre_processed_DATA/crimes.csv', index=False)
-    # offense_codes_df.to_csv(
-    #     'Pre_processed_DATA/offense_codes.csv', index=False)
-    # police_district_codes_df.to_csv(
-    #     'Pre_processed_DATA/police_district_codes.csv', index=False)
+    # save to Pre_processed_DATA folder
+    crimes_df.to_csv('Pre_processed_DATA/crimes.csv', index=False)
+    offense_codes_df.to_csv(
+        'Pre_processed_DATA/offense_codes.csv', index=False)
+    police_district_codes_df.to_csv(
+        'Pre_processed_DATA/police_district_codes.csv', index=False)
 
     # insert in order to avoid foreign key constraint error
     crimes_df.to_sql('crimes', engine, if_exists='replace', index=False)
