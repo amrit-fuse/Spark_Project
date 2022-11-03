@@ -8,17 +8,25 @@ from pyspark.sql.window import Window
 spark = SparkSession.builder.config("spark.jars", "/usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar") \
     .master("local").appName("crime_boston").getOrCreate()
 
-# crime_df = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
 
-crime_df = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
-    .option("driver", "org.postgresql.Driver").option("dbtable", "crimes") \
-    .option("user", "fusemachines").option("password", "hello123").load()
+crime_df = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
+
+offense_code_df = spark.read.csv("/home/saurav/Downloads/offense_codes.csv",header=True,inferSchema=True)
+
+# crime_df = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
+#     .option("driver", "org.postgresql.Driver").option("dbtable", "crimes") \
+#     .option("user", "fusemachines").option("password", "hello123").load()
+
+# offense_code_df = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
+#     .option("driver", "org.postgresql.Driver").option("dbtable", "offense_codes") \
+#     .option("user", "fusemachines").option("password", "hello123").load()   
 
 crime_df.show()
 
 
 #1. Find all the list of dates in 2017 where ‘VANDALISM’ happened.
-vandalism_2017 = crime_df.filter(crime_df['OFFENSE_DESCRIPTION']=='VANDALISM').select(crime_df['OCCURRED_ON_DATE'],crime_df['OFFENSE_DESCRIPTION'])
+join_offense_code = crime_df.join(offense_code_df,crime_df.OFFENSE_CODE==offense_code_df.CODE,"inner")
+vandalism_2017 = join_offense_code.filter(offense_code_df['Name']=='VANDALISM').select(crime_df['OCCURRED_ON_DATE'],offense_code_df['Name'])
 vandalism_2017.show()
 
 vandalism_2017.write.format('jdbc').options(url='jdbc:postgresql://localhost:5432/postgres', driver='org.postgresql.Driver',
@@ -59,13 +67,8 @@ total_robbery.write.format('jdbc').options(url='jdbc:postgresql://localhost:5432
 
 
 # 4.Show all Offense_codes and names which are not listed in crime.csv but in offense_code.csv.
-dfj1 = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
-    .option("driver", "org.postgresql.Driver").option("dbtable", "crimes") \
-    .option("user", "fusemachines").option("password", "hello123").load()
-
-dfj2 = spark.read.format("jdbc").option("url", "jdbc:postgresql://localhost:5432/postgres") \
-    .option("driver", "org.postgresql.Driver").option("dbtable", "offense_codes") \
-    .option("user", "fusemachines").option("password", "hello123").load()
+dfj1 = spark.read.csv("/home/saurav/Downloads/crime.csv",header=True,inferSchema=True)
+dfj2 = spark.read.csv("/home/saurav/Downloads/offense_codes.csv",header=True,inferSchema=True)
 
 result = dfj2.join(dfj1,dfj1.OFFENSE_CODE==dfj2.CODE,"left_anti")
 result.show()
