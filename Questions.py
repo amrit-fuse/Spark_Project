@@ -1,16 +1,12 @@
-# spark-submit --driver-class-path /usr/lib/jvm/java-17-openjdk-amd64/lib/postgresql-42.5.0.jar  Q6_10Spark_submit.py
+# spark-submit --driver-class-path /usr/lib/jvm/java-17-openjdk-amd64/lib/postgresql-42.5.0.jar Questions.py
 
+from All_details import *
 from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.window import Window
 
 spark = SparkSession.builder.appName('Crimes_in_Boston')\
     .getOrCreate()
 
-# edit your  DB info here
-Properties = {'user': 'amrit', 'password': '1234'}
-URL = 'jdbc:postgresql://localhost:5432/crimes_in_boston'
-
-###############
 
 # Loads csv to spark dataframe
 crimes_df = spark.read.csv('DATA/crimes.csv', header=True, inferSchema=True)
@@ -32,6 +28,7 @@ crimes_df.show(5)
 # keep only first duplicate value in offence_code_df
 offense_codes_df = offense_codes_df.dropDuplicates(['CODE'])
 offense_codes_df.sort('CODE').show(5)
+
 
 #####################  Questions  ###################
 
@@ -123,3 +120,43 @@ district_crime_count.show()
 ################### SAVE to POSTGRES #######################
 district_crime_count.write.jdbc(
     url=URL, table='highest_crime_in_each_district_with_count', mode='overwrite', properties=Properties)
+
+
+
+## 16. As each degreee of longitude is 111km apart,  list crimes with counts (yearwsie)  within a 100 km radius of BOSTON police headquater which is at 42.33397849555639, -71.09079628933894 (lat, long) 
+
+#udf to calculate distance between two 
+def degree_distance(lat1, long1, lat2, long2):
+    return 111 * F.sqrt(F.pow(lat1 - lat2, 2) + F.pow(long1 - long2, 2)) # return distance in km 
+
+
+F.udf(degree_distance, FloatType())
+
+crimes_radius_111_df = crimes_df.withColumn('Distance_Apart', degree_distance(F.col('Lat'), F.col('Long'), 42.33397849555639, -71.09079628933894))
+
+crimes_radius_111_df = crimes_radius_111_df.filter(F.col('Distance_Apart') <= 111)
+
+crimes_radius_111_df=crimes_radius_111_df.groupBy('OFFENSE_CODE_GROUP').pivot('YEAR').count().sort('OFFENSE_CODE_GROUP')
+
+crimes_radius_111_df.show()
+
+
+################### SAVE to POSTGRES #######################
+crimes_radius_111_df.write.jdbc(url=URL, table='crimes_yearwise_in_111km_radius', mode='overwrite', properties=Properties)
+
+
+## 17.  List all crimes that occurred in all district (namewsie) and in the  August 2016 
+
+crimes_august_2016_df = crimes_df.filter(F.col('YEAR') == 2016).filter(F.col('MONTH') == 8)
+
+crimes_august_2016_df = crimes_august_2016_df.join(police_district_codes_df, crimes_august_2016_df.DISTRICT == police_district_codes_df.District_Code, how='left')
+
+crimes_august_2016_df = crimes_august_2016_df.filter(F.col('DISTRICT').isNotNull()) # remove null values
+
+
+crimes_august_2016_df = crimes_august_2016_df.groupBy('District_Name').agg(F.collect_set('OFFENSE_CODE_GROUP').alias('CRIME_GROUP')).sort('DISTRICT_NAME')
+
+crimes_august_2016_df.show()
+
+################### SAVE to POSTGRES #######################
+crimes_august_2016_df.write.jdbc(url=URL, table='crime_group_in_all_districts_in_august_2016', mode='overwrite', properties=Properties)
