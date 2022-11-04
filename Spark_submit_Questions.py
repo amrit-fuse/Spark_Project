@@ -30,26 +30,27 @@ police_district_codes_df = spark.read.csv(
 
 
 # function to test if imported data is  not empty
+
 def test_empty_df(df):
     if df.count() == 0:
-        return True
-    else:
         return False
+    else:
+        return True
 
 
 # Function to test Schema and  rows count of data in databse
 def test_database(df, table_name):
-    if spark.read.jdbc(url=URL, table=table_name, properties=Properties).schema == df.schema and spark.read.jdbc(url=URL, table=table_name, properties=Properties).count() == df.count():
-        return True
-    else:
+    if (spark.read.jdbc(url=URL, table=table_name, properties=Properties).schema != df.schema) and (spark.read.jdbc(url=URL, table=table_name, properties=Properties).count() != df.count()):
         return False
+    else:
+        return True
 
 
 # test if dataframes are not empty
-assert test_empty_df(crimes_df) == False, 'crimes_df is empty'
-assert test_empty_df(offense_codes_df) == False, 'offense_codes_df is empty'
+assert test_empty_df(crimes_df), 'crimes_df is empty'
+assert test_empty_df(offense_codes_df), 'offense_codes_df is empty'
 assert test_empty_df(
-    police_district_codes_df) == False, 'police_district_codes_df is empty'
+    police_district_codes_df), 'police_district_codes_df is empty'
 
 ###  PREPROCESSING   PREPROCESSING   PREPROCESSING  PREPROCESSING PREPROCESSING   PREPROCESSING  PREPROCESSING PREPROCESSING ##
 
@@ -88,7 +89,7 @@ vandalism_2017.write.jdbc(url=URL, table='vandalism_2017',
 
 ##############  TEST  ##############
 assert test_database(
-    vandalism_2017, 'vandalism_2017') == False, 'vandalism_2017 is having different schema or count'
+    vandalism_2017, 'vandalism_2017'), 'vandalism_2017 is having different schema or count'
 
 # 2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    2.    #
 # 2.Show the data frame where the District is  null and then fill the null District with “District not Verified”. (udf)
@@ -115,7 +116,7 @@ fill_na.write.jdbc(url=URL, table='fill_na',
 ##################  TEST  ##################
 
 assert test_database(
-    fill_na, 'fill_na') == False, 'fill_na is having different schema or count'
+    fill_na, 'fill_na'), 'fill_na is having different schema or count'
 
 # 3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    3.    #
 # 3.Show the year and total number of Robbery happens in each year.
@@ -133,7 +134,7 @@ total_robbery.write.jdbc(url=URL, table='total_robbery',
 ##################  TEST  ##################
 
 assert test_database(
-    total_robbery, 'total_robbery') == False, 'total_robbery is having different schema or count'
+    total_robbery, 'total_robbery'), 'total_robbery is having different schema or count'
 
 # 4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    4.    #
 # 4.Show all Offense_codes and names which are not listed in crime.csv but in offense_code.csv.
@@ -150,7 +151,7 @@ missing_offences.write.jdbc(
 ##################  TEST  ##################
 
 assert test_database(
-    missing_offences, 'missing_offences') == False, 'missing_offences is having different schema or count'
+    missing_offences, 'missing_offences'), 'missing_offences is having different schema or count'
 
 
 # 5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    5.    #
@@ -173,7 +174,7 @@ sunday_2130.write.jdbc(url=URL, table='sunday_2130',
 ##################  TEST  ##################
 
 assert test_database(
-    sunday_2130, 'sunday_2130') == False, 'sunday_2130 is having different schema or count'
+    sunday_2130, 'sunday_2130'), 'sunday_2130 is having different schema or count'
 # 6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    6.    #
 
 
@@ -200,7 +201,7 @@ window_df.write.jdbc(url=URL, table='rolling_count',
 
 ############### TEST ###############
 assert test_database(
-    window_df, 'rolling_count') == False, 'rolling_count table is having different schema or count'
+    window_df, 'rolling_count'), 'rolling_count table is having different schema or count'
 
 
 # 7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    7.    #
@@ -216,7 +217,7 @@ pivot_df.write.jdbc(url=URL, table='pivot_YEAR',
 
 ################# TEST ################
 assert test_database(
-    pivot_df, 'pivot_YEAR') == False, 'pivot_YEAR table is having different schema or count'
+    pivot_df, 'pivot_YEAR'), 'pivot_YEAR table is having different schema or count'
 
 
 # 8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    8.    #
@@ -243,7 +244,7 @@ robbery_df.write.jdbc(url=URL, table='robbery_in_each_district',
 
 ################# TEST #################
 assert test_database(
-    robbery_df, 'robbery_in_each_district') == False, 'robbery_in_each_district table is having different schema or count'
+    robbery_df, 'robbery_in_each_district'), 'robbery_in_each_district table is having different schema or count'
 
 
 # 9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    9.    #
@@ -268,7 +269,7 @@ incident_df.write.jdbc(url=URL, table='Day_incident_hour',
 
 ################# TEST ##################
 assert test_database(
-    incident_df, 'Day_incident_hour') == False, 'Day_incident_hour table is having different schema or count'
+    incident_df, 'Day_incident_hour'), 'Day_incident_hour table is having different schema or count'
 
 
 # 10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    10.    #
@@ -296,7 +297,7 @@ district_crime_count.write.jdbc(
 
 #################### TEST ###############################
 assert test_database(district_crime_count,
-                     'district_crime_count') == False, 'district_crime_count table is having different schema or count'
+                     'district_crime_count'), 'district_crime_count table is having different schema or count'
 
 
 # 11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    #
@@ -315,7 +316,7 @@ year_crime_count.write.jdbc(
 #################### TEST ###############################
 
 assert test_database(
-    year_crime_count, 'year_crime_count') == False, 'year_crime_count table is having different schema or count'
+    year_crime_count, 'year_crime_count'), 'year_crime_count table is having different schema or count'
 
 
 # 12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    #
@@ -342,7 +343,7 @@ verbal_dispute_df.write.jdbc(
 #################### TEST ###############################
 
 assert test_database(
-    verbal_dispute_df, 'verbal_dispute') == False, 'verbal_dispute table is having different schema or count'
+    verbal_dispute_df, 'verbal_dispute'), 'verbal_dispute table is having different schema or count'
 
 
 # 13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    #
@@ -362,7 +363,7 @@ auto_theft.write.jdbc(url=URL, table='auto_theft',
 #################### TEST ###############################
 
 assert test_database(
-    auto_theft, 'auto_theft') == False, 'auto_theft table is having different schema or count'
+    auto_theft, 'auto_theft'), 'auto_theft table is having different schema or count'
 
 
 # 14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    #
@@ -385,7 +386,7 @@ shooting_df.write.jdbc(url=URL, table='shooting_df',
 
 #################### TEST ###############################
 assert test_database(
-    shooting_df, 'shooting_df') == False, 'shooting_df table is having different schema or count'
+    shooting_df, 'shooting_df'), 'shooting_df table is having different schema or count'
 
 
 # 15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    #
@@ -408,7 +409,7 @@ homicide_df.write.jdbc(url=URL, table='homicide_df',
 
 #################### TEST ###############################
 assert test_database(
-    homicide_df, 'homicide_df') == False, 'homicide_df table is having different schema or count'
+    homicide_df, 'homicide_df'), 'homicide_df table is having different schema or count'
 
 
 # 16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    #
@@ -441,7 +442,7 @@ crimes_radius_111_df.write.jdbc(
 
 #################### TEST ###############################
 assert test_database(crimes_radius_111_df,
-                     'crimes_year_radius') == False, 'crimes_year_radius table is having different schema or count'
+                     'crimes_year_radius'), 'crimes_year_radius table is having different schema or count'
 
 
 # 17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    17.    #
@@ -471,7 +472,7 @@ crimes_august_2016_df.write.jdbc(
 
 #################### TEST ###############################
 assert test_database(crimes_august_2016_df,
-                     'list_crimes_aug_2016') == False, 'list_crimes_aug_2016 table is having different schema or count'
+                     'list_crimes_aug_2016'), 'list_crimes_aug_2016 table is having different schema or count'
 
 
 # 18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    18.    #
