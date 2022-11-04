@@ -65,6 +65,10 @@ crimes_df.show(5)
 offense_codes_df = offense_codes_df.dropDuplicates(['CODE'])
 offense_codes_df.sort('CODE').show(5)
 
+# fill empty string in REPORTING_AREA column with  null
+crimes_df = crimes_df.withColumn('REPORTING_AREA', F.when(F.col('REPORTING_AREA') == ' ', None)
+                                 .otherwise(F.col('REPORTING_AREA')))
+
 
 ### QUESTIONS   QUESTIONS   QUESTIONS  QUESTIONS QUESTIONS     QUESTIONS   QUESTIONS  QUESTIONS QUESTIONS  ###
 
@@ -297,18 +301,114 @@ assert test_database(district_crime_count,
 
 # 11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    11.    #
 #
+# 11. Find the  number of crime happened  for each year
+
+year_crime_count = crimes_df.groupBy('YEAR').count().sort('YEAR')
+
+year_crime_count.show()
+
+
+################### SAVE to POSTGRES #######################
+year_crime_count.write.jdbc(
+    url=URL, table='year_crime_count', mode='overwrite', properties=Properties)
+
+#################### TEST ###############################
+
+assert test_database(
+    year_crime_count, 'year_crime_count') == False, 'year_crime_count table is having different schema or count'
 
 
 # 12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    12.    #
 
 
+# 12. How many Verbal Disputes crimes were committed in 2018.
+
+verbal_dispute = crimes_df.filter(
+    F.col('OFFENSE_CODE_GROUP') == 'Verbal Disputes')
+
+verbal_dispute = verbal_dispute.filter(F.col('YEAR') == 2018)
+
+verbal_dispute = verbal_dispute.count()
+
+verbal_dispute_df = spark.createDataFrame([(verbal_dispute,)], ['count'])
+
+verbal_dispute_df.show()
+
+################### SAVE to POSTGRES #######################
+
+verbal_dispute_df.write.jdbc(
+    url=URL, table='verbal_dispute', mode='overwrite', properties=Properties)
+
+#################### TEST ###############################
+
+assert test_database(
+    verbal_dispute_df, 'verbal_dispute') == False, 'verbal_dispute table is having different schema or count'
+
+
 # 13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    13.    #
+
+# 13. Find how many times ‘Auto Theft’ happened in each year
+
+auto_theft = crimes_df.filter(F.col('OFFENSE_CODE_GROUP') == 'Auto Theft')
+
+auto_theft = auto_theft.groupBy('YEAR').count().sort('YEAR')
+
+auto_theft.show()
+
+################### SAVE to POSTGRES #######################
+auto_theft.write.jdbc(url=URL, table='auto_theft',
+                      mode='overwrite', properties=Properties)
+
+#################### TEST ###############################
+
+assert test_database(
+    auto_theft, 'auto_theft') == False, 'auto_theft table is having different schema or count'
 
 
 # 14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    14.    #
 
 
+# 14.  Reporting Area having highest Shooting incident.
+
+shooting_df = crimes_df.where(crimes_df.SHOOTING == 'Y')
+
+shooting_df = shooting_df.groupBy(
+    'REPORTING_AREA').count().sort('count', ascending=False)
+
+shooting_df = shooting_df.filter(F.col('REPORTING_AREA').isNotNull())
+
+shooting_df.show()
+
+################### SAVE to POSTGRES #######################
+shooting_df.write.jdbc(url=URL, table='shooting_df',
+                       mode='overwrite', properties=Properties)
+
+#################### TEST ###############################
+assert test_database(
+    shooting_df, 'shooting_df') == False, 'shooting_df table is having different schema or count'
+
+
 # 15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    15.    #
+
+
+# 15. Arrange street based on high “Homicide” incident
+
+homicide_df = crimes_df.where(crimes_df.OFFENSE_CODE_GROUP == 'Homicide')
+
+homicide_df = homicide_df.groupBy(
+    'STREET').count().sort('count', ascending=False)
+
+homicide_df = homicide_df.filter(F.col('STREET').isNotNull())
+
+homicide_df.show()
+
+################### SAVE to POSTGRES #######################
+homicide_df.write.jdbc(url=URL, table='homicide_df',
+                       mode='overwrite', properties=Properties)
+
+#################### TEST ###############################
+assert test_database(
+    homicide_df, 'homicide_df') == False, 'homicide_df table is having different schema or count'
 
 
 # 16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    16.    #
