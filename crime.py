@@ -26,7 +26,7 @@ crime_df.show()
 
 #1. Find all the list of dates in 2017 where ‘VANDALISM’ happened.
 join_offense_code = crime_df.join(offense_code_df,crime_df.OFFENSE_CODE==offense_code_df.CODE,"inner")
-vandalism_2017 = join_offense_code.filter(offense_code_df['Name']=='VANDALISM').select(crime_df['OCCURRED_ON_DATE'],offense_code_df['Name'])
+vandalism_2017 = join_offense_code.filter((offense_code_df['Name']=='VANDALISM' ) & (crime_df['Year']==2017)).select(crime_df['OCCURRED_ON_DATE'],offense_code_df['Name'])
 vandalism_2017.show()
 
 vandalism_2017.write.format('jdbc').options(url='jdbc:postgresql://localhost:5432/postgres', driver='org.postgresql.Driver',
