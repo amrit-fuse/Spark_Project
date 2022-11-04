@@ -1,4 +1,15 @@
+
+# AMRIT
+
 # spark-submit --driver-class-path /usr/lib/jvm/java-17-openjdk-amd64/lib/postgresql-42.5.0.jar Spark_submit_Questions.py
+
+# SAURAV
+# spark-submit --driver-class-path /usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar Spark_submit_Questions.py
+
+
+# SHIJAL
+# spark-submit --driver-class-path /usr/lib/jvm/java-11-openjdk-amd64/lib/postgresql-42.5.0.jar Spark_submit_Questions.py
+
 
 from All_details import *
 from pyspark.sql import SparkSession, functions as F
