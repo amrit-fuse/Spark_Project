@@ -1,4 +1,4 @@
-Properties = {'user': 'fusemachines', 'password': 'hello123'}
-URL = 'jdbc:postgresql://localhost:5432/postgres'
+Properties = {'user': 'amrit', 'password': '1234'}
+URL = 'jdbc:postgresql://localhost:5432/crimes_in_boston'
 
-project_dir = '/home/saurav/Documents/Fusemachines/Spark_Project'
+project_dir = '/home/amrit/Spark_Project/'
