@@ -6,10 +6,9 @@
 Properties = {'user': 'amrit', 'password': '1234'}
 URL = 'jdbc:postgresql://localhost:5432/crimes_in_boston'
 
-project_dir = '/home/amrit/Spark_Project/'
+project_dir = '/home/amrit/All_Repos_Env/Spark_Project/'
 
 postgresql_jar_address = '/usr/lib/jvm/java-17-openjdk-amd64/lib/postgresql-42.5.0.jar'
-
 
 # ####  SAURAV  # SAURAV# SAURAV# SAURAV# SAURAV
 
